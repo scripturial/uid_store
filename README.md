@@ -1,6 +1,6 @@
 ## UID UidStore
 
-Generater a random string of a fixed length using any roman letter or numeral.
+Generate a random string of a fixed length using any roman letter or numeral.
 
     let uid = random_string(8);
 
