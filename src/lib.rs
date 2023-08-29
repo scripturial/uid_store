@@ -15,10 +15,21 @@ impl UidStore {
         }
     }
 
-    // Generate, remember, and return a uuid.
+    // Generate, remember, and return a UID.
     pub fn next(&mut self) -> &String {
         loop {
             let id = random_string(self.size);
+            if !self.items.insert(id.clone()) {
+                continue;
+            }
+            return self.items.get(&id).unwrap();
+        }
+    }
+
+    // Generate, remember, and return a human readable UID.
+    pub fn next_human(&mut self) -> &String {
+        loop {
+            let id = human_random_string(self.size);
             if !self.items.insert(id.clone()) {
                 continue;
             }
@@ -36,7 +47,7 @@ impl UidStore {
         self.items.len()
     }
 
-    // return an updated UUID if this one is not unique.
+    // return an updated UID if this one is not unique.
     pub fn make_unique(&mut self, id: &str) -> Option<&str> {
         if self.items.contains(id) {
             return Some(self.next());
@@ -59,12 +70,30 @@ pub fn random_string(size: usize) -> String {
     result
 }
 
+pub fn human_random_string(size: usize) -> String {
+    let mut rng = rand::thread_rng();
+
+    let result: String = (0..size)
+        .map(|_| {
+            let idx = rng.gen_range(0..READABLE_CHARSET.len());
+            READABLE_CHARSET[idx] as char
+        })
+        .collect();
+
+    result
+}
+
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 abcdefghijklmnopqrstuvwxyz\
 0123456789";
 
+const READABLE_CHARSET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ\
+abcdefghjkmnpqrstuvwxyz\
+123456789";
+
 #[cfg(test)]
 mod tests {
+    use crate::human_random_string;
     use crate::random_string;
     use crate::UidStore;
 
@@ -75,6 +104,9 @@ mod tests {
 
         let id2 = random_string(5);
         assert!(id != id2);
+
+        let id3 = human_random_string(5);
+        assert_eq!(id3.len(), 5);
     }
 
     #[test]
