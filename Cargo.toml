@@ -2,7 +2,7 @@
 name = "uid_store"
 description = "Generate short random strings."
 license = "MIT"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 keywords = ["uid"]
 repository = "https://github.com/scripturial/uid_store"

@@ -70,6 +70,19 @@ pub fn random_string(size: usize) -> String {
     result
 }
 
+pub fn random_number(size: usize) -> String {
+    let mut rng = rand::thread_rng();
+
+    let result: String = (0..size)
+        .map(|_| {
+            let idx = rng.gen_range(0..NUMSET.len());
+            NUMSET[idx] as char
+        })
+        .collect();
+
+    result
+}
+
 pub fn human_random_string(size: usize) -> String {
     let mut rng = rand::thread_rng();
 
@@ -91,10 +104,13 @@ const READABLE_CHARSET: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ\
 abcdefghjkmnpqrstuvwxyz\
 123456789";
 
+const NUMSET: &[u8] = b"0123456789";
+
 #[cfg(test)]
 mod tests {
     use crate::human_random_string;
     use crate::random_string;
+    use crate::random_number;
     use crate::UidStore;
 
     #[test]
@@ -105,8 +121,15 @@ mod tests {
         let id2 = random_string(5);
         assert!(id != id2);
 
-        let id3 = human_random_string(5);
-        assert_eq!(id3.len(), 5);
+        let id3 = random_number(6);
+        let id4 = random_number(6);
+        assert_eq!(id3.len(), 6);
+        assert!(id3 != id4);
+
+        let id5 = human_random_string(5);
+        let id6 = human_random_string(5);
+        assert_eq!(id5.len(), 5);
+        assert!(id5 != id6);
     }
 
     #[test]
