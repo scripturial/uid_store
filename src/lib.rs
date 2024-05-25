@@ -9,6 +9,31 @@
 //! The UidStore struct provides helper functions that helps
 //! avoid generation of duplicate uid values, which becomes
 //! very likely when using short UID's.
+//!
+//! Standalone functions to generate random strings:
+//!
+//! ```
+//! let uid = random_string(8);
+//! let uid = random_number(10);
+//! let uid = human_random_string(8);
+//! ```
+//!
+//! Convert a number to and from a base62 uid:
+//!
+//! ```
+//! let uid = number_to_uid(1000);
+//! let number = uid_to_number(uid).unwrap();
+//! ```
+//!
+//! Generate a sequence of UID's that should be unique:
+//!
+//! ```
+//! let mut u = UidStore::new();
+//! let uid = u.next(6);
+//! let uid = u.next_u16();
+//! let uid = u.next_u32();
+//! let uid = u.next_u64();
+//! ```
 
 use rand::Rng;
 use std::collections::HashSet;
@@ -95,9 +120,9 @@ impl UidStore {
         self.items.len()
     }
 
-    // make_unique accepts a uid string, and returns `None`
-    // if this string is unknown to the `UidStore`. If the
-    // string is already in use, a new uid string is returned.
+    /// make_unique accepts a uid string, and returns `None`
+    /// if this string is unknown to the `UidStore`. If the
+    /// string is already in use, a new uid string is returned.
     pub fn make_unique(&mut self, uid: &str) -> Option<&str> {
         if self.items.contains(uid) {
             return Some(self.next(uid.len()));
