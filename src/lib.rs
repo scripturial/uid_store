@@ -12,7 +12,8 @@
 //!
 //! Standalone functions to generate random strings:
 //!
-//! ```rust,no_run,compile_fail
+//! ```rust
+//! # use uid_store::*;
 //! let uid = random_string(8);
 //! let uid = random_number(10);
 //! let uid = human_random_string(8);
@@ -20,14 +21,16 @@
 //!
 //! Convert a number to and from a base62 uid:
 //!
-//! ```rust,no_run,compile_fail
+//! ```rust
+//! # use uid_store::*;
 //! let uid = number_to_uid(1000);
-//! let number = uid_to_number(uid).unwrap();
+//! let number = uid_to_number(&uid).unwrap();
 //! ```
 //!
 //! Generate a sequence of UID's that should be unique:
 //!
-//! ```rust,no_run,compile_fail
+//! ```rust
+//! # use uid_store::*;
 //! let mut u = UidStore::new();
 //! let uid = u.next(6);
 //! let uid = u.next_u16();
@@ -38,7 +41,8 @@
 //! Initialise a UidStore with a sequence of previously
 //! generated `uid` values.
 //!
-//! ```rust,no_run,compile_fail
+//! ```rust
+//! # use uid_store::*;
 //! let mut u = UidStore::new();
 //! u.make_unique("ifh983u");
 //! u.make_unique("Rig3hGa");
@@ -49,8 +53,10 @@
 //! Observe that make_unique was passed the same UID twice, when this happened,
 //! a new UID was generated and returned, this should be handled:
 //!
-//! ```rust,no_run,compile_fail
-//! if let(deduplicate) = u.make_unique("h84gh8A") {
+//! ```rust
+//! # use uid_store::*;
+//! # let mut u = UidStore::new();
+//! if let Some(deduplicate) = u.make_unique("h84gh8A") {
 //!     println!("Duplicate UID for item replaced with: {}", deduplicate);
 //! }
 //! ```
