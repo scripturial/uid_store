@@ -2,7 +2,7 @@
 name = "uid_store"
 description = "Generate random uid strings containing letters, numbers, or base62 values."
 license = "MIT"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 keywords = ["uid"]
 repository = "https://github.com/scripturial/uid_store"
@@ -10,4 +10,3 @@ authors = ["Jay Rhoden <hello@scripturial.com>"]
 categories = ["data-structures"]
 
 [dependencies]
-rand = "0.8.5"

@@ -63,8 +63,9 @@
 //! ```
 //!
 
-use rand::Rng;
 use std::collections::HashSet;
+
+mod random;
 
 /// UidStore holds a collection of previously generated UID
 /// values to ensure a value is only ever generated once.
@@ -162,11 +163,9 @@ impl UidStore {
 
 /// Generate a random base62 string with a fixed string `length`.
 pub fn random_string(length: usize) -> String {
-    let mut rng = rand::thread_rng();
-
     let result: String = (0..length)
         .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
+            let idx = random::next_u32() as usize % CHARSET.len();
             CHARSET[idx] as char
         })
         .collect();
@@ -176,11 +175,9 @@ pub fn random_string(length: usize) -> String {
 
 /// Generate a string of numbers with the specified `length`.
 pub fn random_number(length: usize) -> String {
-    let mut rng = rand::thread_rng();
-
     let result: String = (0..length)
         .map(|_| {
-            let idx = rng.gen_range(0..NUMSET.len());
+            let idx = random::next_u32() as usize % NUMSET.len();
             NUMSET[idx] as char
         })
         .collect();
@@ -191,8 +188,7 @@ pub fn random_number(length: usize) -> String {
 /// Generate a base62 string using a random number
 /// no larger than a specified maximum size.
 pub fn random_max_size(maximum_size: usize) -> String {
-    let mut rng = rand::thread_rng();
-    let uid = rng.gen_range(0..maximum_size);
+    let uid = random::next_u32() as usize % maximum_size;
     number_to_uid(uid)
 }
 
@@ -243,11 +239,9 @@ pub fn uid_to_number(uid: &str) -> Option<usize> {
 /// Generate a random string that doedn't include easily confused
 /// characters such as i,I,1 and o,O,0.
 pub fn human_random_string(length: usize) -> String {
-    let mut rng = rand::thread_rng();
-
     let result: String = (0..length)
         .map(|_| {
-            let idx = rng.gen_range(0..READABLE_CHARSET.len());
+            let idx = random::next_u32() as usize % READABLE_CHARSET.len();
             READABLE_CHARSET[idx] as char
         })
         .collect();

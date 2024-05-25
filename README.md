@@ -1,5 +1,7 @@
 ## UID UidStore
 
+Generate random uid strings containing letters, numbers, or base62 values.
+
 ### Functions to generate random UID's
 
 Generate a random string of a fixed length using any roman letter or numeral.
