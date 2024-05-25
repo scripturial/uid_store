@@ -1,12 +1,12 @@
-//! Generate UID strings of various types.
+//! Generate random uid strings containing letters, numbers, or base62 values.
 //!
 //! This module provides a way to generate various types of
 //! random strings that can be used as a UID. It also allows
 //! generation of UID strings that are base62 representation
-//! of numbers to allow for converstion to and from u16, u32,
-//! and u64.
+//! of numbers to allow for converstion to and from `u16`, `u32`,
+//! and `u64`.
 //!
-//! The UidStore struct provides helper functions that helps
+//! The `UidStore` struct provides helper functions that helps
 //! avoid generation of duplicate uid values, which becomes
 //! very likely when using short UID's.
 //!
@@ -38,8 +38,8 @@
 //! let uid = u.next_u64();
 //! ```
 //!
-//! Initialise a UidStore with a sequence of previously
-//! generated `uid` values.
+//! Initialise a `UidStore` with a sequence of previously
+//! generated uid values.
 //!
 //! ```rust
 //! # use uid_store::*;
@@ -50,8 +50,9 @@
 //! u.make_unique("h84gh8A"); // Duplicate uid triggers new uid generation
 //! ```
 //!
-//! Observe that make_unique was passed the same UID twice, when this happened,
-//! a new UID was generated and returned, this should be handled:
+//! Notice above that `make_unique` was passed the same UID twice, when
+//! this happened, a new UID was generated and returned. This should be
+//! handled:
 //!
 //! ```rust
 //! # use uid_store::*;
@@ -78,7 +79,7 @@ impl UidStore {
         }
     }
 
-    /// next generates a UID string with a `length` number of characters.
+    /// Generate a UID string with a `length` number of characters.
     pub fn next(&mut self, length: usize) -> &String {
         loop {
             let id = random_string(length);
@@ -89,8 +90,8 @@ impl UidStore {
         }
     }
 
-    /// next_human generates a UID string that avoids commonly
-    /// confused letters such as i,1,L, 0,O,o.
+    /// Generate a UID string that avoids commonly
+    /// confused letters such as i,I,1,L, 0,O,o.
     pub fn next_human(&mut self, length: usize) -> &String {
         loop {
             let id = human_random_string(length);
@@ -101,7 +102,7 @@ impl UidStore {
         }
     }
 
-    /// next_u16 generates a UID string that represents a u32 number.
+    /// Generate a UID string that represents a random `u16` number.
     /// The length of the string depends on the size of the number.
     pub fn next_u16(&mut self) -> &String {
         loop {
@@ -113,7 +114,7 @@ impl UidStore {
         }
     }
 
-    /// next_u32 generates a UID string that represents a u32 number.
+    /// Generate a UID string that represents a random `u32` number.
     /// The length of the string depends on the size of the number.
     pub fn next_u32(&mut self) -> &String {
         loop {
@@ -125,7 +126,7 @@ impl UidStore {
         }
     }
 
-    /// next_u64 generates a uid string that represents a u64 number.
+    /// Generate a UID string that represents a random `u64` number.
     /// The length of the string depends on the size of the number.
     pub fn next_u64(&mut self) -> &String {
         loop {
@@ -137,19 +138,19 @@ impl UidStore {
         }
     }
 
-    /// contains returns true if a UID is already in use.
+    /// Returns true if a UID is already in use.
     pub fn contains(&self, id: &str) -> bool {
         self.items.contains(id)
     }
 
-    /// Check how many UID's have already been used.
+    /// Returns how many UID's have already been used.
     pub fn size(&self) -> usize {
         self.items.len()
     }
 
-    /// make_unique accepts a uid string, and returns `None`
-    /// if this string is unknown to the `UidStore`. If the
-    /// string is already in use, a new uid string is returned.
+    /// Register a UID with this `UidStore`. Returns `None` if this
+    /// string is unique and not previously seen. If the string is
+    /// already known and in use, a new uid string is returned.
     pub fn make_unique(&mut self, uid: &str) -> Option<&str> {
         if self.items.contains(uid) {
             return Some(self.next(uid.len()));
@@ -159,11 +160,11 @@ impl UidStore {
     }
 }
 
-/// random_string generates a random base62 string with a fixed string length.
-pub fn random_string(size: usize) -> String {
+/// Generate a random base62 string with a fixed string `length`.
+pub fn random_string(length: usize) -> String {
     let mut rng = rand::thread_rng();
 
-    let result: String = (0..size)
+    let result: String = (0..length)
         .map(|_| {
             let idx = rng.gen_range(0..CHARSET.len());
             CHARSET[idx] as char
@@ -173,11 +174,11 @@ pub fn random_string(size: usize) -> String {
     result
 }
 
-/// random_number generates a string of numbers with the specified size.
-pub fn random_number(size: usize) -> String {
+/// Generate a string of numbers with the specified `length`.
+pub fn random_number(length: usize) -> String {
     let mut rng = rand::thread_rng();
 
-    let result: String = (0..size)
+    let result: String = (0..length)
         .map(|_| {
             let idx = rng.gen_range(0..NUMSET.len());
             NUMSET[idx] as char
@@ -187,16 +188,17 @@ pub fn random_number(size: usize) -> String {
     result
 }
 
-/// random_max_size generates a base62 string using a random number
-/// no larger than the requested size.
-pub fn random_max_size(size: usize) -> String {
+/// Generate a base62 string using a random number
+/// no larger than a specified maximum size.
+pub fn random_max_size(maximum_size: usize) -> String {
     let mut rng = rand::thread_rng();
-    let uid = rng.gen_range(0..size);
+    let uid = rng.gen_range(0..maximum_size);
     number_to_uid(uid)
 }
 
-/// number_to_uid converts a base62 string to the number that was
-/// used to generate the string.
+/// Convert the contents of a base62 string back to
+/// the number that was used to generate the string.
+/// Reverse using `uid_to_number()`.
 pub fn number_to_uid(mut uid: usize) -> String {
     let mut result = String::new();
     if uid == 0 {
@@ -210,9 +212,9 @@ pub fn number_to_uid(mut uid: usize) -> String {
     result
 }
 
-/// Convert a base62 string back into the underlying
-/// number it represents. Returns None if the string
-/// is not a valid base62 number.
+/// Convert a base62 string into the underlying number it
+/// represents. Returns None if the string is not a valid
+/// base62 number. Reverse using `number_to_uid()`.
 pub fn uid_to_number(uid: &str) -> Option<usize> {
     let mut result: usize = 0;
     for c in uid.chars().rev() {
@@ -240,10 +242,10 @@ pub fn uid_to_number(uid: &str) -> Option<usize> {
 
 /// Generate a random string that doedn't include easily confused
 /// characters such as i,I,1 and o,O,0.
-pub fn human_random_string(size: usize) -> String {
+pub fn human_random_string(length: usize) -> String {
     let mut rng = rand::thread_rng();
 
-    let result: String = (0..size)
+    let result: String = (0..length)
         .map(|_| {
             let idx = rng.gen_range(0..READABLE_CHARSET.len());
             READABLE_CHARSET[idx] as char

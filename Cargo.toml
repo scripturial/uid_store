@@ -1,8 +1,8 @@
 [package]
 name = "uid_store"
-description = "Generate short random strings."
+description = "Generate random uid strings containing letters, numbers, or base62 values."
 license = "MIT"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 keywords = ["uid"]
 repository = "https://github.com/scripturial/uid_store"
