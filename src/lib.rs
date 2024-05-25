@@ -37,6 +37,39 @@ impl UidStore {
         }
     }
 
+    // Generate a uid that fits in a u16
+    pub fn next_u16(&mut self) -> &String {
+        loop {
+            let id = random_max_size(u16::MAX as usize);
+            if !self.items.insert(id.clone()) {
+                continue;
+            }
+            return self.items.get(&id).unwrap();
+        }
+    }
+
+    // Generate a uid that fits in a u16
+    pub fn next_u32(&mut self) -> &String {
+        loop {
+            let id = random_max_size(u32::MAX as usize);
+            if !self.items.insert(id.clone()) {
+                continue;
+            }
+            return self.items.get(&id).unwrap();
+        }
+    }
+
+    // next_u64 generates a base62 uid that fits in a u16.
+    pub fn next_u64(&mut self) -> &String {
+        loop {
+            let id = random_max_size(u64::MAX as usize);
+            if !self.items.insert(id.clone()) {
+                continue;
+            }
+            return self.items.get(&id).unwrap();
+        }
+    }
+
     // Check if an ID is already in use
     pub fn contains(&self, id: &str) -> bool {
         self.items.contains(id)
@@ -83,6 +116,52 @@ pub fn random_number(size: usize) -> String {
     result
 }
 
+pub fn random_max_size(size: usize) -> String {
+    let mut rng = rand::thread_rng();
+    let uid = rng.gen_range(0..size);
+    number_to_uid(uid)
+}
+
+pub fn number_to_uid(mut uid: usize) -> String {
+    let mut result = String::new();
+    if uid == 0 {
+        return "A".to_string();
+    }
+    while uid > 0 {
+        let next = uid % CHARSET.len();
+        println!("-- {} {}  - {}", next, uid, CHARSET.len());
+        uid = uid / CHARSET.len();
+        result.push(CHARSET[next] as char);
+    }
+    result
+}
+
+pub fn uid_to_number(uid: &str) -> Option<usize> {
+    let mut result: usize = 0;
+    for c in uid.chars().rev() {
+        /* Rust 1.18
+        let value = match c {
+            'A'..'Z' => c - 'A',
+            'a'..'z' => c - 'a' + 26,
+            '0'..'9' => c - '0' + 26 + 26,
+        };
+        */
+        let value;
+        if c >= 'A' && c <= 'Z' {
+            value = (c as usize) - ('A' as usize);
+        } else if c >= 'a' && c <= 'z' {
+            value = (c as usize) - ('a' as usize) as usize + 26;
+        } else if c >= '0' && c <= '9' {
+            value = (c as usize) - ('0' as usize) + 26 + 26;
+        } else {
+            return None;
+        }
+        println!("== {} {} ", c, value);
+        result = result * 62 + value;
+    }
+    Some(result)
+}
+
 pub fn human_random_string(size: usize) -> String {
     let mut rng = rand::thread_rng();
 
@@ -109,9 +188,36 @@ const NUMSET: &[u8] = b"0123456789";
 #[cfg(test)]
 mod tests {
     use crate::human_random_string;
-    use crate::random_string;
+    use crate::number_to_uid;
     use crate::random_number;
+    use crate::random_string;
+    use crate::uid_to_number;
     use crate::UidStore;
+
+    #[test]
+    fn test_number_to_uid() {
+        assert_eq!(number_to_uid(0), "A");
+        assert_eq!(number_to_uid(1), "B");
+        assert_eq!(number_to_uid(52), "0");
+        assert_eq!(number_to_uid(9902), "sjC");
+        assert_eq!(uid_to_number("A"), Some(0));
+        assert_eq!(uid_to_number("B"), Some(1));
+        assert_eq!(uid_to_number("0"), Some(52));
+        assert_eq!(uid_to_number("sjC"), Some(9902));
+        assert_eq!(uid_to_number(&number_to_uid(94029)), Some(94029));
+        assert_eq!(uid_to_number(&number_to_uid(2294029)), Some(2294029));
+        assert_eq!(uid_to_number(&number_to_uid(43494029)), Some(43494029));
+    }
+
+    #[test]
+    fn test_random_max_size() {
+        let mut u = UidStore::new(10);
+        for _ in [0..1000] {
+            assert!(uid_to_number(u.next_u16()).unwrap() < u16::MAX.into());
+            assert!(uid_to_number(u.next_u32()).unwrap() < u32::MAX.try_into().unwrap());
+            assert!(uid_to_number(u.next_u64()).unwrap() < u64::MAX.try_into().unwrap());
+        }
+    }
 
     #[test]
     fn test_random() {

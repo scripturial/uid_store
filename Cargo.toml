@@ -2,11 +2,11 @@
 name = "uid_store"
 description = "Generate short random strings."
 license = "MIT"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 keywords = ["uid"]
 repository = "https://github.com/scripturial/uid_store"
-authors = ["Jay Rhoden <hello@scripturial.com"]
+authors = ["Jay Rhoden <hello@scripturial.com>"]
 categories = ["data-structures"]
 
 [dependencies]
