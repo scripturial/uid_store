@@ -3,22 +3,22 @@ use std::collections::HashSet;
 
 // Generate unique game item identifiers
 pub struct UidStore {
-    size: usize,
     items: HashSet<String>,
 }
 
+// UidStore generates random UID's while remembering previously
+// generated UID's to make sure we don't issue a duplicate UID.
 impl UidStore {
-    pub fn new(size: usize) -> UidStore {
+    pub fn new() -> UidStore {
         UidStore {
-            size: size,
             items: HashSet::new(),
         }
     }
 
-    // Generate, remember, and return a UID.
-    pub fn next(&mut self) -> &String {
+    // next generates a UID string with a `length` number of characters.
+    pub fn next(&mut self, length: usize) -> &String {
         loop {
-            let id = random_string(self.size);
+            let id = random_string(length);
             if !self.items.insert(id.clone()) {
                 continue;
             }
@@ -26,10 +26,11 @@ impl UidStore {
         }
     }
 
-    // Generate, remember, and return a human readable UID.
-    pub fn next_human(&mut self) -> &String {
+    // next_human generates a UID string that avoids commonly
+    // confused letters such as i,1,L, 0,O,o.
+    pub fn next_human(&mut self, length: usize) -> &String {
         loop {
-            let id = human_random_string(self.size);
+            let id = human_random_string(length);
             if !self.items.insert(id.clone()) {
                 continue;
             }
@@ -37,7 +38,8 @@ impl UidStore {
         }
     }
 
-    // Generate a uid that fits in a u16
+    // next_u16 generates a UID string that represents a u32 number.
+    // The length of the string depends on the size of the number.
     pub fn next_u16(&mut self) -> &String {
         loop {
             let id = random_max_size(u16::MAX as usize);
@@ -48,7 +50,8 @@ impl UidStore {
         }
     }
 
-    // Generate a uid that fits in a u16
+    // next_u32 generates a UID string that represents a u32 number.
+    // The length of the string depends on the size of the number.
     pub fn next_u32(&mut self) -> &String {
         loop {
             let id = random_max_size(u32::MAX as usize);
@@ -59,7 +62,8 @@ impl UidStore {
         }
     }
 
-    // next_u64 generates a base62 uid that fits in a u16.
+    // next_u64 generates a uid string that represents a u64 number.
+    // The length of the string depends on the size of the number.
     pub fn next_u64(&mut self) -> &String {
         loop {
             let id = random_max_size(u64::MAX as usize);
@@ -70,26 +74,29 @@ impl UidStore {
         }
     }
 
-    // Check if an ID is already in use
+    // contains returns true if a UID is already in use.
     pub fn contains(&self, id: &str) -> bool {
         self.items.contains(id)
     }
 
-    // Check if an ID is already in use
+    // Check how many UID's have already been used.
     pub fn size(&self) -> usize {
         self.items.len()
     }
 
-    // return an updated UID if this one is not unique.
-    pub fn make_unique(&mut self, id: &str) -> Option<&str> {
-        if self.items.contains(id) {
-            return Some(self.next());
+    // make_unique accepts a uid string, and returns `None`
+    // if this string is unknown to the `UidStore`. If the
+    // string is already in use, a new uid string is returned.
+    pub fn make_unique(&mut self, uid: &str) -> Option<&str> {
+        if self.items.contains(uid) {
+            return Some(self.next(uid.len()));
         }
-        self.items.insert(id.to_string());
+        self.items.insert(uid.to_string());
         None
     }
 }
 
+// random_string generates a random base62 string with a fixed string length.
 pub fn random_string(size: usize) -> String {
     let mut rng = rand::thread_rng();
 
@@ -103,6 +110,7 @@ pub fn random_string(size: usize) -> String {
     result
 }
 
+// random_number generates a string of numbers with the specified size.
 pub fn random_number(size: usize) -> String {
     let mut rng = rand::thread_rng();
 
@@ -116,12 +124,16 @@ pub fn random_number(size: usize) -> String {
     result
 }
 
+// random_max_size generates a base62 string using a random number
+// no larger than the requested size.
 pub fn random_max_size(size: usize) -> String {
     let mut rng = rand::thread_rng();
     let uid = rng.gen_range(0..size);
     number_to_uid(uid)
 }
 
+// number_to_uid converts a base62 string to the number that was
+// used to generate the string.
 pub fn number_to_uid(mut uid: usize) -> String {
     let mut result = String::new();
     if uid == 0 {
@@ -129,13 +141,15 @@ pub fn number_to_uid(mut uid: usize) -> String {
     }
     while uid > 0 {
         let next = uid % CHARSET.len();
-        println!("-- {} {}  - {}", next, uid, CHARSET.len());
         uid = uid / CHARSET.len();
         result.push(CHARSET[next] as char);
     }
     result
 }
 
+// Convert a base62 string back into the underlying
+// number it represents. Returns None if the string
+// is not a valid base62 number.
 pub fn uid_to_number(uid: &str) -> Option<usize> {
     let mut result: usize = 0;
     for c in uid.chars().rev() {
@@ -156,7 +170,6 @@ pub fn uid_to_number(uid: &str) -> Option<usize> {
         } else {
             return None;
         }
-        println!("== {} {} ", c, value);
         result = result * 62 + value;
     }
     Some(result)
@@ -211,7 +224,7 @@ mod tests {
 
     #[test]
     fn test_random_max_size() {
-        let mut u = UidStore::new(10);
+        let mut u = UidStore::new();
         for _ in [0..1000] {
             assert!(uid_to_number(u.next_u16()).unwrap() < u16::MAX.into());
             assert!(uid_to_number(u.next_u32()).unwrap() < u32::MAX.try_into().unwrap());
@@ -240,18 +253,18 @@ mod tests {
 
     #[test]
     fn test_unique() {
-        let mut u = UidStore::new(10);
+        let mut u = UidStore::new();
         let id: String;
         let id2: String;
         {
-            id = u.next().to_string();
+            id = u.next(10).to_string();
             assert_eq!(id.len(), 10, "failed");
             assert!(u.contains(&id));
         };
         assert_eq!(u.size(), 1, "failed");
         {
-            id2 = u.next().to_string();
-            assert_eq!(id2.len(), 10, "failed");
+            id2 = u.next(8).to_string();
+            assert_eq!(id2.len(), 8, "failed");
             assert!(u.contains(&id2));
         };
         assert_eq!(u.size(), 2, "failed");

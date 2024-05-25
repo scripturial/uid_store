@@ -30,21 +30,20 @@ twice.
 Generate a sequence of 10 character UID strings that are guaranteed to
 to be unique:
 
-    let mut u = UidStore::new(10);
-    let id = u.next();
+    let mut u = UidStore::new();
+    let uid = u.next(10);
 
 Generate a sequence of UID strings that are limited in size to fit
 within a unsigned integer type.
 
-    let mut u = UidStore::new(10 /* Ignored if using number sized UID */);
-    let id = u.next_u16();
-    let id = u.next_u32();
-    let id = u.next_u64();
+    let mut u = UidStore::new();
+    let uid = u.next_u16();
+    let uid = u.next_u32();
+    let uid = u.next_u64();
 
 Generate a new uid if this uid is already in the bucket.
 
-    let uid = "0123456789";
-    let o = u.make_unique(uid);
-    if o.is_some() {
-        println!("New UID generated. {}", o.unwrap());
+    let mut u = UidStore::new();
+    if let Some(uid) = u.make_unique("0123456789") {
+        println!("New UID generated. {}", uid);
     }
