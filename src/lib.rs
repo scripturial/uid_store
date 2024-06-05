@@ -188,6 +188,10 @@ pub fn random_number(length: usize) -> String {
 /// Generate a base62 string using a random number
 /// no larger than a specified maximum size.
 pub fn random_max_size(maximum_size: usize) -> String {
+    if maximum_size > u32::MAX as usize {
+        let uid = random::next_u64() as usize % maximum_size;
+        return number_to_uid(uid);
+    }
     let uid = random::next_u32() as usize % maximum_size;
     number_to_uid(uid)
 }

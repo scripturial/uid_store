@@ -60,6 +60,11 @@ pub(crate) fn next_u32() -> u32 {
     RND.lock().unwrap().next_u32()
 }
 
+#[inline]
+pub(crate) fn next_u64() -> u64 {
+    RND.lock().unwrap().next_u64()
+}
+
 /*
 #[inline]
 pub(crate) fn next_usize() -> usize {
