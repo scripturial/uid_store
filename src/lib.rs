@@ -159,6 +159,17 @@ impl UidStore {
         self.items.insert(uid.to_string());
         None
     }
+
+    /// Register a UID with this `UidStore`. Returns `None` if this
+    /// string is unique and not previously seen. If the string is
+    /// already known and in use, a new uid string is returned.
+    pub fn make_unique_u16(&mut self, uid: &str) -> Option<&str> {
+        if self.items.contains(uid) {
+            return Some(self.next_u16());
+        }
+        self.items.insert(uid.to_string());
+        None
+    }
 }
 
 /// Generate a random base62 string with a fixed string `length`.
