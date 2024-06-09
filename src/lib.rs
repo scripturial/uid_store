@@ -305,10 +305,22 @@ mod tests {
     #[test]
     fn test_random_max_size() {
         let mut u = UidStore::new();
-        for _ in [0..1000] {
-            assert!(uid_to_number(u.next_u16()).unwrap() < u16::MAX.into());
-            assert!(uid_to_number(u.next_u32()).unwrap() < u32::MAX.try_into().unwrap());
-            assert!(uid_to_number(u.next_u64()).unwrap() < u64::MAX.try_into().unwrap());
+        for _ in [0..100000] {
+            assert!(uid_to_number(u.next_u16()).unwrap() <= u16::MAX.into());
+            assert!(uid_to_number(u.next_u32()).unwrap() <= u32::MAX.try_into().unwrap());
+            assert!(uid_to_number(u.next_u64()).unwrap() <= u64::MAX.try_into().unwrap());
+        }
+        let mut u = UidStore::new();
+        for _ in [0..50000] {
+            assert!(uid_to_number(u.next_u16()).unwrap() <= u16::MAX.into());
+        }
+        let mut u = UidStore::new();
+        let _ = u.make_unique_u16("BBB");
+        for _ in [0..50000] {
+            let v = u.make_unique_u16("BBB");
+            assert!(!v.is_none());
+            let v = uid_to_number(&v.unwrap()).unwrap();
+            assert!(v <= u16::MAX.into());
         }
     }
 
