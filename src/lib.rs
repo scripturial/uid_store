@@ -285,6 +285,10 @@ mod tests {
         assert_eq!(uid_to_number(&number_to_uid(94029)), Some(94029));
         assert_eq!(uid_to_number(&number_to_uid(2294029)), Some(2294029));
         assert_eq!(uid_to_number(&number_to_uid(43494029)), Some(43494029));
+        assert_eq!(
+            uid_to_number(&number_to_uid(uid_to_number("mRO").expect("ok"))).expect("ok"),
+            uid_to_number("mRO").expect("ok")
+        );
     }
 
     #[test]
