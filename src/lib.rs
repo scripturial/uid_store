@@ -69,6 +69,7 @@ mod random;
 
 /// UidStore holds a collection of previously generated UID
 /// values to ensure a value is only ever generated once.
+#[derive(Debug)]
 pub struct UidStore {
     items: HashSet<String>,
 }
